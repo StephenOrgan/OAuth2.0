@@ -19,10 +19,17 @@ session = DBSession()
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 from oauth2client.client import AccessTokenCredentials
+from oauth2client.client import OAuth2WebServerFlow
+from requests_oauthlib import OAuth2Session
+from requests_oauthlib.compliance_fixes import linkedin_compliance_fix
+
+
 import httplib2
 import json
 from flask import make_response
 import requests
+import time
+
 
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
@@ -34,7 +41,14 @@ CLIENT_ID = json.loads(
 def showLogin():
   state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
   login_session['state'] = state
-  return render_template('login.html', STATE=state)
+  client_id = '78v58nkt9lprx2'
+  return_uri = 'http://item-catalogue.dev:5500/callback/linkedin'
+  login_state = login_session['state']
+  scope = "r_basicprofile r_emailaddress"
+  linkedinurl = "https://www.linkedin.com/uas/oauth2/authorization"
+  linkedinurl += "?response_type=code&client_id=%s&scope=%s&state=%s&redirect_uri=%s" % (client_id, scope, login_state, return_uri)
+
+  return render_template('login.html', STATE=state, linkedinurl=linkedinurl)
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
@@ -116,6 +130,7 @@ def gconnect():
     user_id = getUserID(login_session['email'])
     if not user_id:
         user_id = createUser(login_session)
+    updatePicture(login_session)
     login_session['user_id'] = user_id
 
     output = ''
@@ -163,6 +178,91 @@ def gdisconnect():
       response = make_response(json.dumps('Failed to revoke token for given user.', 400))
       response.headers['Content-Type'] = 'application/json'
       return response
+
+@app.route('/lidisconnect')
+def lidisconnect():
+    print login_session.keys()
+    access_token = login_session['access_token']
+    print 'In liisconnect access token is %s', access_token
+    print 'User name is: ' 
+    print login_session['username']
+    if access_token is None:
+      print 'Access Token is None'
+      response = make_response(json.dumps('Current user not connected.'), 401)
+      response.headers['Content-Type'] = 'application/json'
+      return response
+    
+    if access_token: 
+      del login_session['username']
+      del login_session['email']
+      del login_session['picture']
+      del login_session['user_id']
+      del login_session['access_token']
+      
+      response = make_response(json.dumps('Successfully disconnected.'), 200)
+      response.headers['Content-Type'] = 'application/json'
+      return response
+    
+    else:
+      response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+      response.headers['Content-Type'] = 'application/json'
+      return response
+
+@app.route('/callback/linkedin', methods=['POST', 'GET'])
+def linkedincallback():
+  code = request.args.get('code')
+  request_state = request.args.get('state')
+  login_state = login_session['state']
+  return_uri = 'http://item-catalogue.dev:5500/callback/linkedin'
+
+  client_id = json.loads(open('ln_client_secrets.json', 'r').read())['web']['app_id']
+  client_secret = json.loads(open('ln_client_secrets.json', 'r').read())['web']['app_secret']
+
+  if request_state != login_state:
+    response = make_response(json.dumps('Invalid state parameter.'), 401)
+    response.headers['Content-Type'] = 'application/json'
+    return response
+
+  url = "https://www.linkedin.com/oauth/v2/accessToken"
+  url += "?grant_type=authorization_code&code=%s&client_id=%s&client_secret=%s&redirect_uri=%s" % (code, client_id, client_secret, return_uri)
+
+  h = httplib2.Http()
+  result = h.request(url, 'GET')[1]
+  access_token = result.split('\"')[3]
+  login_session['access_token'] = access_token
+  
+
+  userinfo_url = "https://api.linkedin.com/v1/people/~:(id,email-address,first-name,last-name,picture-url)"
+  userinfo_url += "?format=json&oauth2_access_token=%s" % login_session['access_token']
+
+  h = httplib2.Http()
+  result_data = h.request(userinfo_url, 'GET')[1]
+  data = json.loads(result_data)
+
+
+  first_name = data["firstName"] 
+  last_name = data["lastName"]
+  login_session['username'] = first_name + " " + last_name
+  login_session['email'] = data["emailAddress"]
+  login_session['user_id'] = data["id"]
+  login_session['picture'] = data["pictureUrl"]
+  login_session['provider'] = 'linkedin'
+
+
+  # see if user exists
+  user_id = getUserID(login_session['email'])
+  if not user_id:
+    user_id = createUser(login_session)
+  
+
+  updatePicture(login_session)
+  user = session.query(User).filter_by(email=login_session['email']).one()
+  login_session['user_id'] = user_id
+  flash("Now logged in as %s" % login_session['username'])
+  print user.picture
+  #return output
+  return redirect('/restaurant')
+  
 
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
@@ -214,6 +314,7 @@ def fbconnect():
     user_id = getUserID(login_session['email'])
     if not user_id:
         user_id = createUser(login_session)
+    updatePicture(login_session)
     login_session['user_id'] = user_id
 
     output = ''
@@ -328,6 +429,8 @@ def showMenu(restaurant_id):
     items = session.query(MenuItem).filter_by(restaurant_id = restaurant_id).all()
     creator = getUserInfo(restaurant.user_id)
 
+    print login_session['user_id']
+    print creator.id
     if 'username' not in login_session or creator.id != login_session['user_id']:
       return render_template('publicmenu.html', items=items, restaurant=restaurant, creator=creator)
     else:
@@ -418,6 +521,13 @@ def createUser(login_session):
   user = session.query(User).filter_by(email = login_session['email']).one()
   return user.id
 
+def updatePicture(login_session):
+  updateUser = session.query(User).filter_by(email=login_session['email']).one()
+  updateUser.picture = login_session['picture']
+  session.add(updateUser)
+  session.commit()
+  return updateUser.picture
+
 # Disconnect based on provider
 @app.route('/disconnect')
 def disconnect():
@@ -431,6 +541,11 @@ def disconnect():
             #del login_session['provider']
         if login_session['provider'] == 'facebook':
           fbdisconnect()
+          del login_session['provider']
+          flash("You have successfully been logged out.")
+          return redirect(url_for('showRestaurants'))
+        if login_session['provider'] == 'linkedin':
+          lidisconnect()
           del login_session['provider']
           flash("You have successfully been logged out.")
           return redirect(url_for('showRestaurants'))

@@ -1,0 +1,40 @@
+{% extends "main2.html" %}
+{% block head %}
+    {{ super() }}
+    <title>
+        Details For {{ item[0].name }} 
+    </title>
+{% endblock %}
+
+{% block content %}
+    {{ super() }} 
+    <!-- <div class="add_item_button">
+        <a href="{{ url_for('addItemToCategory', category_id=main_category) }}">
+            Add Item
+        </a>
+    </div> -->
+
+    <div class="items">
+        <h2>
+            {{ item[0].name }} 
+        </h2>
+            {% if item[0].user_id == user_id %}
+                <a href="/category/{{main_category}}/editItem/{{item[0].id}}/"> Edit </a>
+                <br />
+                <a href="/category/{{main_category}}/deleteItem/{{item[0].id}}/">Delete</a>
+            {% endif %}
+            <ul>
+                <li>
+                    <img src="/static/uploads/{{item[0].image_url}}" width="300px" />
+                </li>
+                <li>
+                    {{ item[0].description }}
+
+                </li>
+                
+            </ul>
+        </div>
+
+        
+
+{% endblock %}

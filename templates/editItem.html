@@ -1,0 +1,49 @@
+{% extends "main2.html" %}
+{% block head %}
+    {{ super() }}
+    <title>
+        Edit {{ item.name }}
+    </title>
+{% endblock %}
+
+{% block content %}
+
+    <div class="form_area">
+        <h1>
+            Edit {{ item.name }}
+        </h1>
+        <div class="edit_form">
+            <form action="{{ url_for('editItem', category_id=category.id, item_id = item.id) }}" enctype="multipart/form-data" method="POST">
+                <label for="name">Name:</label>
+                <br />
+                <input type="text" class="text_entry" name="name" value="{{ item.name }}" />
+                <br /><br />
+                
+                <label for="image">Image:</label><br />
+                <img src="/static/uploads/{{item.image_url}}" width="300px"/><br />
+                <input type="file" class="image_upload" name="file" value=" " />
+                <br /><br />
+                <label for="description">Description:</label><br />
+                <textarea class="text_entry" name="description" rows="10" col="1000" style="width: 300px; height: 150px;">{{ item.description }}</textarea>
+                <input type="hidden" name="state" value="{{STATE}}" />
+                <br />
+                <br />
+
+                <button type="submit" class="submit_button" type="submit">
+                    Submit
+                </button>
+                <br />
+                <br />
+            </form>
+            <a href="{{ url_for('showItem', category_id=category.id, item_id=item.id) }}" >
+                <button class="cancel_button">
+                    Cancel
+                </button>
+            </a>
+
+
+
+        </div>
+    </div>
+
+{% endblock %}

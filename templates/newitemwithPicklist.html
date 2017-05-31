@@ -1,0 +1,62 @@
+{% extends "main2.html" %}
+{% block head %}
+    {{ super() }}
+    <title>
+        Add an item
+    </title>
+{% endblock %}
+
+{% block content %}
+
+    <div class="form_area">
+        <h2>
+            Add an item
+        </h2>
+        <div class="edit_form">
+            <form action="{{ url_for('addItemWithoutCategory') }}" enctype="multipart/form-data" method="POST">
+                <label for="name">Name:</label>
+                <br />
+                <input type="text" class="text_entry" name="name" value=" " />
+                <br /><br />
+                <label for="image">Upload Image:</label>
+                <br />
+                <input type="file" class="image_upload" name="file" value=" " />
+                <br /><br>
+                <label for="Category">Pick a category</label>
+                <br />
+                <select name="category_id">
+                    {% if category %}
+                    <option value="{{category.id}}">{{category.name}}</option>
+                    {% else %}
+                    <option value="">Please Select</option>
+                    {% endif %}
+                    {% for c in categories %}
+                    <option value="{{c.id}}">{{c.name}}</option>
+                    {% endfor %}
+                </select>    
+                <br /><br />
+                <label for="description">Description:</label>
+                <br />
+                <textarea class="text_entry" name="description" rows="10" col="1000" style="width: 300px; height: 150px;"></textarea>
+                <input type="hidden" name="state" value="{{STATE}}" />
+                <br />
+                <br />
+
+
+                <button type="submit" class="submit_button" type="submit">
+                    Submit
+                </button>
+            </form>
+            <br />
+
+                <a href="{{ url_for('showCategories') }}" >
+                    <button class="cancel_button">
+                        Cancel
+                    </button>
+                </a>
+
+
+        </div>
+    </div>
+
+{% endblock %}

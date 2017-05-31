@@ -1,0 +1,30 @@
+{% extends "main2.html" %}
+{% block head %}
+    {{ super() }}
+    <title>
+        Categories - All The Categories Made By You
+    </title>
+{% endblock %}
+
+{% block content %}
+    {{ super() }}
+
+    <div class="items">
+        <h2>
+            Recently Added Items
+        </h2>
+
+            <ul>
+        {% for item in items %}
+            <li>
+                <a href="{{url_for('showItem', category_id=item.category_id, item_id=item.id)}}" >
+                    {{ item.name }}
+                </a>
+                ( {{item.item_category.name}} )
+            </li>
+        {% endfor %}
+            </ul>
+
+    </div>
+
+{% endblock %}

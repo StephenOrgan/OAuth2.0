@@ -1,0 +1,38 @@
+{% extends "main2.html" %}
+{% block head %}
+    {{ super() }}
+    <title>
+        All The Items From {{ main_category.name }}
+    </title>
+{% endblock %}
+
+{% block category_url %}
+{{category_id}}
+{% endblock %}
+
+{% block content %}
+    {{ super() }}
+            <!--<div class="add_item_button">
+                <a href="{{ url_for('addItemToCategory', category_id=main_category.id) }}">
+                    Add Item
+                </a>
+            </div> -->
+    <div class="items">
+        <h2>
+            {{main_category.name}}
+        </h2>
+        <div class="item_list">
+            <ul>
+        {% for item in items %}
+                <li>
+                    <a href="{{url_for('showItem', category_id=main_category.id, item_id=item.id)}}" >
+                        {{ item.name }}
+                    </a>
+                </li>
+        {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+
+{% endblock %}

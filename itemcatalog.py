@@ -30,7 +30,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 db = DBHelper()
 
 G_SOURCE = 'client_secrets.json'
-LI_SOURCE = 'ln_client_secrets'
+LI_SOURCE = 'ln_client_secrets.json'
 
 G_CID = json.loads(open(G_SOURCE, 'r').read())['web']['client_id']
 LI_ID = json.loads(open(LI_SOURCE, 'r').read())['web']['app_id']
@@ -93,6 +93,24 @@ def showLogin():
     return render_template('login2.html', STATE=login_session['state'], 
                           linkedinurl=linkedinurl)
 
+
+# serialized JSON
+@app.route('/category/<int:category_id>/JSON')
+def categoryItemJSON(category_id):
+    category = session.query(Category).filter_by(id = category_id).one()
+    items = session.query(Item).filter_by(category_id = category_id).all()
+    return jsonify(Items=[i.serialize for i in items])
+
+
+@app.route('/category/<int:category_id>/item/<int:item_id>/JSON')
+def ItemJSON(category_id, item_id):
+    item = session.query(Item).filter_by(id = item_id).one()
+    return jsonify(Item = item.serialize)
+
+@app.route('/category/JSON')
+def categoriesJSON():
+    categories = session.query(Category).all()
+    return jsonify(categories= [c.serialize for c in categories])
 
 
 # CRUD

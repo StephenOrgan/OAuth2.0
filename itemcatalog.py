@@ -29,7 +29,14 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = DBHelper()
 
-G_CID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
+G_SOURCE = 'client_secrets.json'
+LI_SOURCE = 'ln_client_secrets'
+
+G_CID = json.loads(open(G_SOURCE, 'r').read())['web']['client_id']
+LI_ID = json.loads(open(LI_SOURCE, 'r').read())['web']['app_id']
+LI_SECRET = json.loads(open(LI_SOURCE, 'r').read())['web']['app_secret']
+LI_RET_URI = json.loads(open(LI_SOURCE, 'r').read())['web']['return_uri']
+LI_SCOPE = "r_basicprofile r_emailaddress"
 
 
 # Static Pages
@@ -77,16 +84,11 @@ def showItem(category_id, item_id):
 @app.route('/login')
 def showLogin():
     createSession()
-    
-    #linkedin creds to pass to link for authorization
-    client_id = '78v58nkt9lprx2'
-    return_uri = 'http://item-catalogue.dev:5500/callback/linkedin'
     login_state = login_session['state']
-    scope = "r_basicprofile r_emailaddress"
     linkedinurl = "https://www.linkedin.com/uas/oauth2/authorization"
     linkedinurl += "?response_type=code&client_id="
-    linkedinurl += "%s&scope=%s&state=%s&redirect_uri=%s" % (client_id, scope, 
-                                                      login_state, return_uri)
+    linkedinurl += "%s&scope=%s&state=%s&redirect_uri=%s" % (LI_ID, LI_SCOPE, 
+                                                      login_state, LI_RET_URI)
 
     return render_template('login2.html', STATE=login_session['state'], 
                           linkedinurl=linkedinurl)

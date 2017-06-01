@@ -1,11 +1,11 @@
 # Udacity - Item Catalogue Project
 
 
-## Overview
+## Overview:
 
 This project contains a web application that allows user to create items within a variety of categories and integrates social sign-in with Google, Facebook, and LinkedIn for authorization.
 
-## Pre-requisites
+## Pre-requisites:
 
 In order to run this application, please ensure you have Python, Vagrant, and VirtualBox installed.  This project uses a pre-configured Vagrant virtual machine which has a Flask server installed.
 
@@ -66,7 +66,7 @@ Note that LinkedIn cannot have a return URL that is localhost and you must have 
 ```
 
 
-## Setting up the Database
+## Setting up the Database:
 In the root directory type the following commands to install the database and it's properties:
 
 ```
@@ -76,7 +76,7 @@ $ cd /vagrant
 $ python itemcatalog_db_setup.py
 ```
 
-## Importing Categories to the database
+## Importing Categories to the database:
 There is a file that can populate some categories into the database.  To preload some categories into the database:
 
 ```
@@ -88,7 +88,7 @@ $ python itemcatalog_import_categories.py
 
 
 
-## Run the Application
+## Run the Application:
 
 ```
 $ cd vagrant

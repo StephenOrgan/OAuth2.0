@@ -20,102 +20,25 @@ from oauth2client.client import FlowExchangeError
 from itemcatalog_db_setup import Base, Category, Item, User
 from werkzeug.utils import secure_filename
 
-APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/uploads')
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-db = DBHelper()
-
-G_SOURCE = 'client_secrets.json'
-LI_SOURCE = 'ln_client_secrets.json'
-
-G_CID = json.loads(open(G_SOURCE, 'r').read())['web']['client_id']
-LI_ID = json.loads(open(LI_SOURCE, 'r').read())['web']['app_id']
-LI_SECRET = json.loads(open(LI_SOURCE, 'r').read())['web']['app_secret']
-LI_RET_URI = json.loads(open(LI_SOURCE, 'r').read())['web']['return_uri']
-LI_SCOPE = "r_basicprofile r_emailaddress"
+from handlers.utility_methods import *
 
 
 # Static Pages
-@app.route('/')
-@app.route('/category/')
-def showCategories():
-    createSession()
-    categories = db.getIndexCategories()
-    latestItems = db.getLatestItems()
-    return render_template('category-index.html',
-                           categories=categories,
-                           items=latestItems,
-                           user_id=login_session.get('user_id'),
-                           STATE=login_session.get('state'))
 
 
-@app.route('/category/<int:category_id>/')
-def showItemsByCategory(category_id):
-    createSession()
-    categories = db.getIndexCategories()
-    category = db.getByCategory(category_id)
-    items = db.getItemsByCategory(category_id)
-    return render_template('category.html',
-                           main_category=category,
-                           categories=categories,
-                           category_id = category_id,
-                           items=items,
-                           user_id=login_session.get('user_id'),
-                           STATE=login_session.get('state'))
-
-
-@app.route('/category/<int:category_id>/item/<int:item_id>/')
-def showItem(category_id, item_id):
-    createSession()
-    categories = db.getIndexCategories()
-    item = db.getByItem(item_id)
-    return render_template('item.html',
-                           categories=categories,
-                           item=item,
-                           main_category=category_id,
-                           user_id=login_session.get('user_id'),
-                           STATE=login_session.get('state'),
-                           category_id = category_id)
-
-@app.route('/login')
-def showLogin():
-    createSession()
-    login_state = login_session['state']
-    linkedinurl = "https://www.linkedin.com/uas/oauth2/authorization"
-    linkedinurl += "?response_type=code&client_id="
-    linkedinurl += "%s&scope=%s&state=%s&redirect_uri=%s" % (LI_ID, LI_SCOPE, 
-                                                      login_state, LI_RET_URI)
-
-    return render_template('login2.html', STATE=login_session['state'], 
-                          linkedinurl=linkedinurl)
-
-
-# serialized JSON
-@app.route('/category/<int:category_id>/JSON')
-def categoryItemJSON(category_id):
-    category = session.query(Category).filter_by(id = category_id).one()
-    items = session.query(Item).filter_by(category_id = category_id).all()
-    return jsonify(Items=[i.serialize for i in items])
-
-
-@app.route('/category/<int:category_id>/item/<int:item_id>/JSON')
-def ItemJSON(category_id, item_id):
-    item = session.query(Item).filter_by(id = item_id).one()
-    return jsonify(Item = item.serialize)
-
-@app.route('/category/JSON')
-def categoriesJSON():
-    categories = session.query(Category).all()
-    return jsonify(categories= [c.serialize for c in categories])
+from handlers.category_index import *
+from handlers.category_items import *
+from handlers.item_show import *
+from handlers.login import *
 
 
 # CRUD
 
+from handlers.item_new import *
+"""
 @app.route('/addItem', methods=['GET','POST'])
+@login_required
 def addItemWithoutCategory(category_id=None):
   createSession()
   categories = db.getIndexCategories()
@@ -124,8 +47,6 @@ def addItemWithoutCategory(category_id=None):
   
   if category_identifier:
     category = db.getByCategory(category_identifier)
-  if 'name' not in login_session:
-        return redirect(url_for('showLogin'))
   if not category_id and request.method != 'POST':
     return render_template('newitemwithPicklist.html', 
                           STATE=login_session['state'], categories=categories, 
@@ -142,6 +63,8 @@ def addItemWithoutCategory(category_id=None):
         return render_template('newitemwithPicklist.html', 
                               STATE=login_session['state'], 
                               categories=categories)
+
+"""
 
 def validitem():
   name = request.form['name']

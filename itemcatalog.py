@@ -21,6 +21,9 @@ from itemcatalog_db_setup import Base, Category, Item, User
 from werkzeug.utils import secure_filename
 
 
+
+
+
 from handlers.utility_methods import *
 
 
@@ -36,6 +39,7 @@ from handlers.login import *
 # CRUD
 
 from handlers.item_new import *
+
 """
 @app.route('/addItem', methods=['GET','POST'])
 @login_required
@@ -64,7 +68,7 @@ def addItemWithoutCategory(category_id=None):
                               STATE=login_session['state'], 
                               categories=categories)
 
-"""
+
 
 def validitem():
   name = request.form['name']
@@ -76,6 +80,8 @@ def validitem():
     return True
   else:
     return None
+
+"""
 
 @app.route('/category/<int:category_id>/addItem', methods=['GET', 'POST'])
 def addItemToCategory(category_id):

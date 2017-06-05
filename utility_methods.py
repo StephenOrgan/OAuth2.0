@@ -11,11 +11,9 @@ from flask import jsonify, make_response, send_from_directory
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/uploads')
-
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
-app = Flask(__name__, template_folder='../templates')
-
+app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -73,7 +71,6 @@ def createSession():
   if login_session.get('state') is None:
     login_session['state'] = ''.join(
       random.choice(string.ascii_uppercase + string.digits)for x in xrange(32))
-    print login_session['state']
 
 
 def responseHelper(message, response_code):

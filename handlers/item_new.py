@@ -1,5 +1,11 @@
+import requests
 from itemcatalog_db_helper import *
-from handlers.utility_methods import *
+from handlers.utility_methods import app, login_required, createSession
+from flask import redirect, request, render_template, flash
+from flask import Flask, url_for, session as login_session
+
+#app = Flask(__name__, template_folder='../templates')
+
 
 db = DBHelper()
 
@@ -24,12 +30,23 @@ def addItemWithoutCategory(category_id=None):
       category = db.getByCategory(category_identifier)
 
     if category:
-      print "why isn't this working?"
-      return render_template('newitem.html', 
+      print "render_template is not rendering the template and instead giving me a view error"
+      return render_template('newitemwithPicklist.html', 
                           STATE=login_session['state'], categories=categories, 
                           category=category)
 
-    if not category_id:
+    if not category:
       return render_template('newitemwithPicklist.html', 
                               STATE=login_session['state'], 
                               categories=categories)
+
+def validitem():
+  name = request.form['name']
+  description = request.form['description']
+  category_id = request.form['category_id']
+  newfile = request.files['file']
+
+  if name and description and category_id and newfile:
+    return True
+  else:
+    return None

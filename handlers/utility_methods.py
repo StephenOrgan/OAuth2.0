@@ -9,12 +9,15 @@ from flask import Flask, url_for, session as login_session
 from flask import jsonify, make_response, send_from_directory
 
 
-APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+APP_ROOT = os.path.abspath(os.sep)
 UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/uploads')
+TEMPLATE_FOLDER = os.path.join(APP_ROOT, 'templates')
+
+print TEMPLATE_FOLDER
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
-app = Flask(__name__, template_folder='../templates')
+app = Flask(__name__, template_folder=TEMPLATE_FOLDER)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 

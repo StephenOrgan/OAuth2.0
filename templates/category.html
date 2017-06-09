@@ -12,11 +12,6 @@
 
 {% block content %}
     {{ super() }}
-            <!--<div class="add_item_button">
-                <a href="{{ url_for('addItemToCategory', category_id=main_category.id) }}">
-                    Add Item
-                </a>
-            </div> -->
     <div class="items">
         <h2>
             {{main_category.name}}
@@ -25,7 +20,7 @@
             <ul>
         {% for item in items %}
                 <li>
-                    <a href="{{url_for('showItem', category_id=main_category.id, item_id=item.id)}}" >
+                    <a href="{{url_for('itemshow.showItem', category_id=main_category.id, item_id=item.id)}}" >
                         {{ item.name }}
                     </a>
                 </li>

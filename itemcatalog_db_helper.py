@@ -18,11 +18,11 @@ class DBHelper:
 
     def getUserBy(self, auth_session):
         try:
-            user = session.query(User).filter_by(email=auth_session['email']).one()
+            user = session.query(User).filter_by(email=auth_session['email']).first()
             return user
         except:
             self.addUser(auth_session)
-            return session.query(User).filter_by(email=auth_session['email']).one()
+            return session.query(User).filter_by(email=auth_session['email']).first()
 
     def getByCategory(self, category_id):
         return session.query(Category).filter_by(id=category_id).first()
@@ -52,6 +52,25 @@ class DBHelper:
         session.commit()
         return
 
+    def getUserID(self, email):
+      try:
+        user = session.query(User).filter_by(email = email).first()
+        print "boobs"
+        return user.id
+      except:
+        return None
+
+    def getUserInfo(self, user_id):
+            user = session.query(User).filter_by(id=user_id).one()
+            return user
+
+    def getUser(self, email):
+      try:
+        user = session.query(User).filter_by(email = email).first()
+        return user
+      except:
+        return None
+
 
     @staticmethod
     def createUser(auth_session):
@@ -63,7 +82,7 @@ class DBHelper:
 
     @staticmethod
     def updatePicture(login_session):
-        updateUser = session.query(User).filter_by(email=login_session['email']).one()
+        updateUser = session.query(User).filter_by(email=login_session['email']).first()
         updateUser.picture = login_session['picture']
         session.add(updateUser)
         session.commit()

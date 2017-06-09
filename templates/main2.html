@@ -28,13 +28,13 @@
             <div id="sign_in_button" class="sign_in_button">
         {% if user_id == None %}
             
-            <a href="{{url_for('showLogin')}}">
+            <a href="{{url_for('login.showLogin')}}">
                 Login
             </a>
            
         {% else %}
 
-            <a href="{{url_for('disconnect')}}">
+            <a href="{{url_for('logout.disconnect')}}">
                 Logout
             </a>
 
@@ -42,7 +42,7 @@
 
          </div>
             <div class="page_title">
-                <a href="{{url_for('showCategories')}}" id="title-header">
+                <a href="{{url_for('category.showCategories')}}" id="title-header">
                     Categories
                 </a>
             </div>
@@ -52,9 +52,9 @@
             <div class="add_item_button">
                 
                 {% if request.args.get('category_id') %}
-                <a href="{{ url_for('addItemWithoutCategory', category_id=request.args.get('category_id')) }}">
+                <a href="{{ url_for('newitem.addItemWithoutCategory', category_id=request.args.get('category_id')) }}">
                 {% else %}
-                <a href="{{ url_for('addItemWithoutCategory', category_id=category_id) }}">
+                <a href="{{ url_for('newitem.addItemWithoutCategory', category_id=category_id) }}">
                 {% endif %}
                     Add Item
                 </a>
@@ -76,7 +76,7 @@
                                     {% else %}
                                     <li>
                                     {% endif %}    
-                                        <a href="{{url_for('showItemsByCategory', category_id=category.id)}}" >
+                                        <a href="{{url_for('itemforcategory.showItemsByCategory', category_id=category.id)}}" >
                                             {{ category.name }}
                                         </a>
                                     </li>

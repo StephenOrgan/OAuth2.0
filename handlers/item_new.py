@@ -1,16 +1,19 @@
-import requests
+import os
 from itemcatalog_db_helper import *
-from handlers.utility_methods import app, login_required, createSession
-from flask import redirect, request, render_template, flash
+from handlers.utility_methods import login_required, createSession, checkAuthorizedState, allowed_file
+from flask import redirect, request, render_template, flash, Blueprint, current_app as app
 from flask import Flask, url_for, session as login_session
+from werkzeug.utils import secure_filename
 
-#app = Flask(__name__, template_folder='../templates')
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'static/uploads'))
 
+newitem = Blueprint("newitem", __name__, template_folder="../templates")
 
 db = DBHelper()
 
-@app.route('/addItem', methods=['GET','POST'])
 @login_required
+@newitem.route('/addItem', methods=['GET','POST'])
 def addItemWithoutCategory(category_id=None):
   createSession()
   categories = db.getIndexCategories()
@@ -23,14 +26,13 @@ def addItemWithoutCategory(category_id=None):
       return responseWith('Invalid authorization paramaters.', 401)  
     if validitem():
       saveItemWithPicture(request.form['category_id'])
-      return redirect(url_for('showItemsByCategory', 
+      return redirect(url_for('itemforcategory.showItemsByCategory', 
                       category_id = request.form['category_id']))
   else:
     if category_identifier:
       category = db.getByCategory(category_identifier)
 
     if category:
-      print "render_template is not rendering the template and instead giving me a view error"
       return render_template('newitemwithPicklist.html', 
                           STATE=login_session['state'], categories=categories, 
                           category=category)
@@ -50,3 +52,24 @@ def validitem():
     return True
   else:
     return None
+
+def saveItemWithPicture(category_id):
+  print ('uploading file...') 
+  file = request.files['file']
+        
+  if file and allowed_file(file.filename):
+    filename = secure_filename(file.filename)
+    print 'saving file...'
+    file.save(os.path.join(UPLOAD_FOLDER, filename))
+    print 'upload complete!'
+
+  login_user_id = login_session['user_id']
+  newItem = Item(
+    name = request.form['name'], 
+    description = request.form['description'], 
+    image_url = filename, 
+    category_id = category_id,
+    user_id = login_user_id)
+  db.addToDb(newItem)
+  flash('New Item:  %s, Successfully Created' % (newItem.name))
+

@@ -1,9 +1,13 @@
 from itemcatalog_db_helper import *
-from handlers.utility_methods import *
+from utility_methods import createSession
+from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import session as login_session
+
+item = Blueprint("itemforcategory", __name__, template_folder="../templates")
 
 db = DBHelper()
 
-@app.route('/category/<int:category_id>/')
+@item.route('/category/<int:category_id>/')
 def showItemsByCategory(category_id):
     createSession()
     categories = db.getIndexCategories()
@@ -19,7 +23,7 @@ def showItemsByCategory(category_id):
 
 
 # serialized JSON
-@app.route('/category/<int:category_id>/JSON')
+@item.route('/category/<int:category_id>/JSON')
 def categoryItemJSON(category_id):
     category = db.getByCategory(category_id)
     items = db.getItemsByCategory(category_id)

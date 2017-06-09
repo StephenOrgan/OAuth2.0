@@ -13,7 +13,7 @@
             Edit {{ item.name }}
         </h1>
         <div class="edit_form">
-            <form action="{{ url_for('editItem', category_id=category.id, item_id = item.id) }}" enctype="multipart/form-data" method="POST">
+            <form action="{{ url_for('item_edit.editItem', category_id=category.id, item_id = item.id) }}" enctype="multipart/form-data" method="POST">
                 <label for="name">Name:</label>
                 <br />
                 <input type="text" class="text_entry" name="name" value="{{ item.name }}" />
@@ -35,7 +35,7 @@
                 <br />
                 <br />
             </form>
-            <a href="{{ url_for('showItem', category_id=category.id, item_id=item.id) }}" >
+            <a href="{{ url_for('itemshow.showItem', category_id=category.id, item_id=item.id) }}" >
                 <button class="cancel_button">
                     Cancel
                 </button>

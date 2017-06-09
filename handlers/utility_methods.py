@@ -8,29 +8,8 @@ from flask import redirect, request, render_template, flash
 from flask import Flask, url_for, session as login_session
 from flask import jsonify, make_response, send_from_directory
 
-
-APP_ROOT = os.path.abspath(os.sep)
-UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/uploads')
-TEMPLATE_FOLDER = os.path.join(APP_ROOT, 'templates')
-
-print TEMPLATE_FOLDER
-
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
-
-app = Flask(__name__, template_folder=TEMPLATE_FOLDER)
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-
-G_SOURCE = 'client_secrets.json'
-LI_SOURCE = 'ln_client_secrets.json'
-
-G_CID = json.loads(open(G_SOURCE, 'r').read())['web']['client_id']
-LI_ID = json.loads(open(LI_SOURCE, 'r').read())['web']['app_id']
-LI_SECRET = json.loads(open(LI_SOURCE, 'r').read())['web']['app_secret']
-LI_RET_URI = json.loads(open(LI_SOURCE, 'r').read())['web']['return_uri']
-LI_SCOPE = "r_basicprofile r_emailaddress"
-
+UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'static/uploads'))
 
 def login_required(func):
     @wraps(func) # this requires an import
@@ -57,6 +36,8 @@ def setCredentials(new_credential):
 def getUserID(email):
   try:
     user = session.query(User).filter_by(email = email).one()
+    print user
+    print "boobs"
     return user.id
   except:
     return None
@@ -78,9 +59,16 @@ def createSession():
       random.choice(string.ascii_uppercase + string.digits)for x in xrange(32))
     print login_session['state']
 
+def checkAuthorizedState(client_state):
+  return client_state == login_session['state']
+
 
 def responseHelper(message, response_code):
   response = make_response(json.dumps(message), response_code)
   response.headers['Content-Type'] = 'application/json'
   print response
   return response
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

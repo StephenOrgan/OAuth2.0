@@ -37,6 +37,6 @@ db = DBHelper()
 
 
 if __name__ == "__main__":
-  app.secret_key = 'the_most_sEcReTest-KEy_in_The_wOrLD'
-  app.debug = True
-  app.run(host='0.0.0.0', port=5500)
+    app.secret_key = 'the_most_sEcReTest-KEy_in_The_wOrLD'
+    app.debug = True
+    app.run(host='0.0.0.0', port=5500)
